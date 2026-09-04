@@ -56,7 +56,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-
+        
         <Route path='*' element={<NotFound404 />} />
       </Routes>
 
