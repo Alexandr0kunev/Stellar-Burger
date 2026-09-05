@@ -11,6 +11,10 @@ import {
 } from '@pages';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AppHeader, Modal, OrderInfo, IngredientDetails } from '@components';
+import { Preloader } from '@ui';
+import { useDispatch, useSelector } from '../../services/store';
+import { getIngredients } from '../../services/slices/ingredients';
+import { useEffect } from 'react';
 import '../../index.css';
 import styles from './app.module.css';
 
@@ -19,13 +23,37 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
 );
 
 const AppRoutes = () => {
-  /** TODO: взять переменные из стора
-    const isIngredientsLoading = false;
-    const ingredients = [];
-    const error = null; */
-
   const location = useLocation();
   const backgroundLocation = location.state?.background;
+
+  const dispatch = useDispatch();
+  const { ingredients, isLoading, error } = useSelector(
+    (state) => state.ingredients
+  );
+
+  useEffect(() => {
+    dispatch(getIngredients());
+  }, [dispatch]);
+
+  if (isLoading) {
+    return (
+      <div className={styles.app}>
+        <AppHeader />
+        <Preloader />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.app}>
+        <AppHeader />
+        <div className={`${styles.error} text text_type_main-medium pt-4`}>
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.app}>
@@ -56,7 +84,6 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-        
         <Route path='*' element={<NotFound404 />} />
       </Routes>
 
