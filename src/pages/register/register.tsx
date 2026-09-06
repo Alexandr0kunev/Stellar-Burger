@@ -17,17 +17,18 @@ export const Register: FC = () => {
   );
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to='/' replace />;
   }
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    dispatch(registerUser({ name: userName, email, password }))
-    .then((action) => {
-      if (action.meta.requestStatus === 'fulfilled') {
-        navigate('/');
+    dispatch(registerUser({ name: userName, email, password })).then(
+      (action) => {
+        if (action.meta.requestStatus === 'fulfilled') {
+          navigate('/');
+        }
       }
-    });
+    );
   };
 
   return (

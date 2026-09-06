@@ -9,7 +9,7 @@ import { resetConstructor } from '../../services/slices/burgerConstructor';
 export const BurgerConstructor: FC = () => {
   const constructorState = useSelector((state) => state.burgerConstructor);
   const orderState = useSelector((state) => state.order);
-  const {isAuthenticated} = useSelector((state) => state.user);
+  const { isAuthenticated } = useSelector((state) => state.user);
 
   const constructorItems = constructorState?.items || {
     bun: null,
@@ -23,8 +23,8 @@ export const BurgerConstructor: FC = () => {
   const onOrderClick = () => {
     if (!constructorItems.bun) return;
 
-    if(!isAuthenticated) {
-      navigate('/login', {state: {from: location}});
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: location } });
       return;
     }
 

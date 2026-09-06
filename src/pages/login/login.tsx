@@ -24,13 +24,12 @@ export const Login: FC = () => {
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
 
-    dispatch(loginUser({ email, password }))
-      .then((action) => {
-        if (action.meta.requestStatus === 'fulfilled') {
-          const from = location.state?.from?.pathname || '/';
-          navigate(from, { replace: true });
-        }
-      });
+    dispatch(loginUser({ email, password })).then((action) => {
+      if (action.meta.requestStatus === 'fulfilled') {
+        const from = location.state?.from?.pathname || '/';
+        navigate(from, { replace: true });
+      }
+    });
   };
 
   return (
