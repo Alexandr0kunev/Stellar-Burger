@@ -9,18 +9,47 @@ import {
   Register,
   ResetPassword
 } from '@pages';
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  useLocation,
+  Navigate
+} from 'react-router-dom';
 import { AppHeader, Modal, OrderInfo, IngredientDetails } from '@components';
 import { Preloader } from '@ui';
 import { useDispatch, useSelector } from '../../services/store';
 import { getIngredients } from '../../services/slices/ingredients';
+import { checkUserAuth } from '../../services/slices/user';
 import { useEffect } from 'react';
 import '../../index.css';
 import styles from './app.module.css';
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => (
-  <>{children}</>
-);
+const ProtectedRoute = ({
+  children,
+  onlyUnAuth = false
+}: {
+  children: React.ReactNode;
+  onlyUnAuth?: boolean;
+}) => {
+  const { isAuthChecked, isAuthenticated } = useSelector((state) => state.user);
+  const location = useLocation();
+
+  if (!isAuthChecked) {
+    return <Preloader />;
+  }
+
+  if (!onlyUnAuth && !isAuthenticated) {
+    return <Navigate replace to='/login' state={{ from: location }} />;
+  }
+
+  if (onlyUnAuth && isAuthenticated) {
+    const from = location.state?.from || { pathname: '/' };
+    return <Navigate replace to={from} />;
+  }
+
+  return <>{children}</>;
+};
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -31,11 +60,14 @@ const AppRoutes = () => {
     (state) => state.ingredients
   );
 
+  const { isAuthChecked } = useSelector((state) => state.user);
+
   useEffect(() => {
     dispatch(getIngredients());
+    dispatch(checkUserAuth());
   }, [dispatch]);
 
-  if (isLoading) {
+  if (!isAuthChecked || isLoading) {
     return (
       <div className={styles.app}>
         <AppHeader />

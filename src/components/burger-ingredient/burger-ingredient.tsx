@@ -7,12 +7,11 @@ import { TBurgerIngredientProps } from './type';
 
 export const BurgerIngredient: FC<TBurgerIngredientProps> = memo(
   ({ ingredient, count }) => {
-    
     const location = useLocation();
     const dispatch = useDispatch();
 
     const handleAdd = () => {
-      if  (ingredient.type === 'bun') {
+      if (ingredient.type === 'bun') {
         dispatch(addBun(ingredient));
       } else {
         dispatch(addIngredient(ingredient));
