@@ -27,9 +27,13 @@ const burgerConstructorSlice = createSlice({
         ...action.payload,
         id: `${action.payload._id}-${Date.now()}`
       });
+    },
+    resetConstructor: (state) => {
+      state.items.bun = null;
+      state.items.ingredients = [];
     }
   }
 });
 
-export const { addBun, addIngredient } = burgerConstructorSlice.actions;
+export const { addBun, addIngredient, resetConstructor } = burgerConstructorSlice.actions;
 export default burgerConstructorSlice.reducer;

@@ -1,25 +1,52 @@
 import { FC, useMemo } from 'react';
 import { TConstructorIngredient } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
-import { useSelector } from '../../services/store';
+import { useSelector, useDispatch } from '../../services/store';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { orderBurger, resetOrderModal } from '../../services/slices/order';
+import { resetConstructor } from '../../services/slices/burgerConstructor';
 
 export const BurgerConstructor: FC = () => {
   const constructorState = useSelector((state) => state.burgerConstructor);
+  const orderState = useSelector((state) => state.order);
+  const {isAuthenticated} = useSelector((state) => state.user);
 
   const constructorItems = constructorState?.items || {
     bun: null,
     ingredients: []
   };
 
-  const orderRequest = false;
-  const orderModalData = null;
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const onOrderClick = () => {
-    if (!constructorItems.bun || orderRequest) return;
-    console.log('Оформить заказ', { constructorItems, price });
+    if (!constructorItems.bun) return;
+
+    if(!isAuthenticated) {
+      navigate('/login', {state: {from: location}});
+      return;
+    }
+
+    const ingredientsIds = [
+      constructorItems.bun._id,
+      ...constructorItems.ingredients.map((item) => item._id),
+      constructorItems.bun._id
+    ];
+
+    dispatch(orderBurger(ingredientsIds))
+      .then((action) => {
+        if (action.meta.requestStatus === 'fulfilled') {
+          dispatch(resetConstructor());
+        }
+      })
+      .catch((error) => {
+        console.error('Ошибка при оформлении заказа:', error);
+      });
   };
+
   const closeOrderModal = () => {
-    console.log('Закрыть модальное окно');
+    dispatch(resetOrderModal());
   };
 
   const price = useMemo(
@@ -35,9 +62,9 @@ export const BurgerConstructor: FC = () => {
   return (
     <BurgerConstructorUI
       price={price}
-      orderRequest={orderRequest}
+      orderRequest={orderState.orderRequest}
       constructorItems={constructorItems}
-      orderModalData={orderModalData}
+      orderModalData={orderState.orderModalData}
       onOrderClick={onOrderClick}
       closeOrderModal={closeOrderModal}
     />
