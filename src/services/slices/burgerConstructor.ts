@@ -15,6 +15,8 @@ const initialState: TConstructorState = {
   }
 };
 
+const generateId = () => Math.random().toString(36).substring(2, 9);
+
 const burgerConstructorSlice = createSlice({
   name: 'burgerConstructor',
   initialState,
@@ -22,11 +24,16 @@ const burgerConstructorSlice = createSlice({
     addBun: (state, action: PayloadAction<TIngredient>) => {
       state.items.bun = { ...action.payload, id: `${action.payload._id}-bun` };
     },
-    addIngredient: (state, action: PayloadAction<TIngredient>) => {
-      state.items.ingredients.push({
-        ...action.payload,
-        id: `${action.payload._id}-${Date.now()}`
-      });
+    addIngredient: {
+      reducer: (state, action: PayloadAction<TConstructorIngredient>) => {
+        state.items.ingredients.push(action.payload);
+      },
+      prepare: (ingredient: TIngredient) => ({
+        payload: {
+          ...ingredient,
+          id: generateId()
+        }
+      })
     },
     removeIngredient: (state, action: PayloadAction<string>) => {
       state.items.ingredients = state.items.ingredients.filter(

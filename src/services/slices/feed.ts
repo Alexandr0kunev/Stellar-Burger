@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getFeedsApi } from '@api';
+import { getFeedsApi, getOrderByNumberApi } from '@api';
 import { TOrder } from '@utils-types';
 
 export type TFeedState = {
@@ -30,6 +30,18 @@ export const getFeed = createAsyncThunk(
   }
 );
 
+export const getOrderByNumber = createAsyncThunk(
+  'feed/getOrderByNumber',
+  async (number: number, { rejectWithValue }) => {
+    try {
+      const response = await getOrderByNumberApi(number);
+      return response.orders[0];
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Ошибка загрузки заказа');
+    }
+  }
+);
+
 const feedSlice = createSlice({
   name: 'feed',
   initialState,
@@ -49,6 +61,14 @@ const feedSlice = createSlice({
       .addCase(getFeed.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      .addCase(getOrderByNumber.fulfilled, (state, action) => {
+        const exists = state.orders.find(
+          (order) => order.number === action.payload.number
+        );
+        if (!exists) {
+          state.orders.push(action.payload);
+        }
       });
   }
 });

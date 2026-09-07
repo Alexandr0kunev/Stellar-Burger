@@ -8,55 +8,51 @@ import {
   ProfileIcon
 } from '@zlden/react-developer-burger-ui-components';
 
-const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
-  isActive
-    ? 'text text_type_main-default text_color_primary'
-    : 'text text_type_main-default text_color_inactive';
-
 export const AppHeader: FC = () => {
   const { user } = useSelector((state) => state.user);
 
+  const renderNavLink = (
+    to: string,
+    Icon: typeof BurgerIcon,
+    text: string,
+    mrClass: string = 'mr-10'
+  ) => (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        `text text_type_main-default ${isActive ? 'text_color_primary' : 'text_color_inactive'}`
+      }
+      style={{ display: 'flex', alignItems: 'center' }}
+    >
+      {({ isActive }) => (
+        <>
+          <Icon type={isActive ? 'primary' : 'secondary'} />
+          <p className={`text text_type_main-default ml-2 ${mrClass}`}>
+            {text}
+          </p>
+        </>
+      )}
+    </NavLink>
+  );
+
   const linkConstructor = useMemo(
-    () => (
-      <NavLink
-        to='/'
-        className={getNavLinkClass}
-        style={{ display: 'flex', alignItems: 'center' }}
-      >
-        <BurgerIcon type='primary' />
-        <p className='text text_type_main-default ml-2 mr-10'>Конструктор</p>
-      </NavLink>
-    ),
+    () => renderNavLink('/', BurgerIcon, 'Конструктор', 'mr-10'),
     []
   );
 
   const linkFeed = useMemo(
-    () => (
-      <NavLink
-        to='/feed'
-        className={getNavLinkClass}
-        style={{ display: 'flex', alignItems: 'center' }}
-      >
-        <ListIcon type='primary' />
-        <p className='text text_type_main-default ml-2'>Лента заказов</p>
-      </NavLink>
-    ),
+    () => renderNavLink('/feed', ListIcon, 'Лента заказов', ''),
     []
   );
 
   const linkProfile = useMemo(
-    () => (
-      <NavLink
-        to={user ? '/profile' : '/login'}
-        className={getNavLinkClass}
-        style={{ display: 'flex', alignItems: 'center' }}
-      >
-        <ProfileIcon type='primary' />
-        <p className='text text_type_main-default ml-2'>
-          {user?.name || 'Личный кабинет'}
-        </p>
-      </NavLink>
-    ),
+    () =>
+      renderNavLink(
+        '/profile',
+        ProfileIcon,
+        user?.name || 'Личный кабинет',
+        ''
+      ),
     [user]
   );
 
