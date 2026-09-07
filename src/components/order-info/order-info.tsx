@@ -6,15 +6,24 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from '../../services/store';
 
 export const OrderInfo: FC = () => {
-  const { number } = useParams<{number: string}>();
- 
-  const orders = useSelector((state) => state.feed.orders);
+  const { number } = useParams<{ number: string }>();
+
+  const feedOrders = useSelector((state) => state.feed.orders);
+  const profileOrders = useSelector((state) => state.profile.orders);
   const ingredients = useSelector((state) => state.ingredients.ingredients);
 
-  const orderData = useMemo(() => orders.find((order) => order.number === Number(number)), [orders, number]);
+  const allOrders = useMemo(
+    () => [...feedOrders, ...profileOrders],
+    [feedOrders, profileOrders]
+  );
+
+  const orderData = useMemo(
+    () => allOrders.find((order) => order.number === Number(number)),
+    [allOrders, number]
+  );
 
   const orderInfo = useMemo(() => {
-    if (!orderData || !ingredients.length) return null;
+    if (!orderData) return null;
 
     const date = new Date(orderData.createdAt);
 

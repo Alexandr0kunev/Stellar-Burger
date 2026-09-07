@@ -4,7 +4,10 @@ import { BurgerConstructorUI } from '@ui';
 import { useSelector, useDispatch } from '../../services/store';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { orderBurger, resetOrderModal } from '../../services/slices/order';
-import { resetConstructor } from '../../services/slices/burgerConstructor';
+import {
+  resetConstructor,
+  removeIngredient
+} from '../../services/slices/burgerConstructor';
 
 export const BurgerConstructor: FC = () => {
   const constructorState = useSelector((state) => state.burgerConstructor);
@@ -59,6 +62,10 @@ export const BurgerConstructor: FC = () => {
     [constructorItems]
   );
 
+  const handleRemoveIngredient = (id: string) => {
+    dispatch(removeIngredient(id));
+  };
+
   return (
     <BurgerConstructorUI
       price={price}
@@ -67,6 +74,7 @@ export const BurgerConstructor: FC = () => {
       orderModalData={orderState.orderModalData}
       onOrderClick={onOrderClick}
       closeOrderModal={closeOrderModal}
+      onRemoveIngredient={handleRemoveIngredient}
     />
   );
 };

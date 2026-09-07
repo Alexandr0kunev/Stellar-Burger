@@ -1,8 +1,9 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {
   loginUserApi,
   registerUserApi,
   getUserApi,
+  updateUserApi,
   logoutApi,
   TLoginData,
   TRegisterData
@@ -18,6 +19,8 @@ export type TUserState = {
   loginError: string | null;
   registerRequest: boolean;
   registerError: string | null;
+  updateUserRequest: boolean;
+  updateUserError: string | null;
 };
 
 const initialState: TUserState = {
@@ -27,7 +30,9 @@ const initialState: TUserState = {
   loginRequest: false,
   loginError: null,
   registerRequest: false,
-  registerError: null
+  registerError: null,
+  updateUserRequest: false,
+  updateUserError: null
 };
 
 export const checkUserAuth = createAsyncThunk(
@@ -62,6 +67,21 @@ export const registerUser = createAsyncThunk(
     setCookie('accessToken', response.accessToken);
     localStorage.setItem('refreshToken', response.refreshToken);
     return response.user;
+  }
+);
+
+export const updateUser = createAsyncThunk(
+  'user/updateUser',
+  async (
+    data: { name?: string; email?: string; password?: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await updateUserApi(data);
+      return response.user;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Ошибка обновления данных');
+    }
   }
 );
 
@@ -112,6 +132,18 @@ const userSlice = createSlice({
       .addCase(registerUser.rejected, (state, action) => {
         state.registerRequest = false;
         state.registerError = action.error.message || 'Ошибка регистрации';
+      })
+      .addCase(updateUser.pending, (state) => {
+        state.updateUserRequest = true;
+        state.updateUserError = null;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.updateUserRequest = false;
+        state.user = action.payload;
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        state.updateUserRequest = false;
+        state.updateUserError = action.payload as string;
       })
       .addCase(logoutUser.pending, (state) => {})
       .addCase(logoutUser.fulfilled, (state) => {

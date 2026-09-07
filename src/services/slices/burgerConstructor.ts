@@ -28,6 +28,11 @@ const burgerConstructorSlice = createSlice({
         id: `${action.payload._id}-${Date.now()}`
       });
     },
+    removeIngredient: (state, action: PayloadAction<string>) => {
+      state.items.ingredients = state.items.ingredients.filter(
+        (item) => item.id !== action.payload
+      );
+    },
     resetConstructor: (state) => {
       state.items.bun = null;
       state.items.ingredients = [];
@@ -35,6 +40,6 @@ const burgerConstructorSlice = createSlice({
   }
 });
 
-export const { addBun, addIngredient, resetConstructor } =
+export const { addBun, addIngredient, removeIngredient, resetConstructor } =
   burgerConstructorSlice.actions;
 export default burgerConstructorSlice.reducer;
