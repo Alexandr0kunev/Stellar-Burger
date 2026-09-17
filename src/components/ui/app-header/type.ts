@@ -1,3 +1,6 @@
 export type TAppHeaderUIProps = {
-  userName: string | undefined;
+  userName?: string | undefined;
+  linkConstructor?: JSX.Element;
+  linkFeed?: JSX.Element;
+  linkProfile?: JSX.Element;
 };
