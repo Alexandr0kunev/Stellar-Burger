@@ -33,6 +33,17 @@ module.exports = {
     'node_modules/(?!(@zlden/react-developer-burger-ui-components)/)'
   ],
 
+  moduleNameMapper: {
+    '^@api$': '<rootDir>/src/utils/burger-api.ts',
+    '^@utils-types$': '<rootDir>/src/utils/types.ts',
+    '^@components/(.*)$': '<rootDir>/src/components/$1',
+  },
+
+  // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/tests/'
+  ],
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
@@ -171,11 +182,6 @@ module.exports = {
 
   // This option allows use of a custom test runner
   // testRunner: "jest-circus/runner",
-
-  // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  // testPathIgnorePatterns: [
-  //   "\\\\node_modules\\\\"
-  // ],
 
   // An array of regexp pattern strings that are matched against all modules before the module loader will automatically return a mock for them
   // unmockedModulePathPatterns: undefined,
