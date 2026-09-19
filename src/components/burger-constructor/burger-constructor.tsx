@@ -67,14 +67,16 @@ export const BurgerConstructor: FC = () => {
   };
 
   return (
-    <BurgerConstructorUI
-      price={price}
-      orderRequest={orderState.orderRequest}
-      constructorItems={constructorItems}
-      orderModalData={orderState.orderModalData}
-      onOrderClick={onOrderClick}
-      closeOrderModal={closeOrderModal}
-      onRemoveIngredient={handleRemoveIngredient}
-    />
+    <section data-testid='constructor'>
+      <BurgerConstructorUI
+        price={price}
+        orderRequest={orderState.orderRequest}
+        constructorItems={constructorItems}
+        orderModalData={orderState.orderModalData}
+        onOrderClick={onOrderClick}
+        closeOrderModal={closeOrderModal}
+        onRemoveIngredient={handleRemoveIngredient}
+      />
+    </section>
   );
 };
