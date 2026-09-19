@@ -27,20 +27,24 @@ test.describe('Интеграционные тесты конструктора 
   test('Открытие и закрытие модального окна ингредиента', async ({ page }) => {
     await page.goto('/');
     
-    const bunCard = page.locator('li').filter({ hasText: TEST_BUN_NAME }).first();
-    await bunCard.click();
+    await page.locator('li').filter({ hasText: TEST_BUN_NAME }).locator('img').first().click();
 
-    await expect(page.getByText('Детали ингредиента').first()).toBeVisible();
-    await expect(page.getByText(TEST_BUN_NAME).first()).toBeVisible();
+    await expect(page.locator('#modals').getByText('Детали ингредиента')).toBeVisible();
+    await expect(page.locator('#modals').getByText(TEST_BUN_NAME)).toBeVisible();
+
+    await expect(page.locator('#modals').getByText('420')).toBeVisible();
+    await expect(page.locator('#modals').getByText('80')).toBeVisible();
+    await expect(page.locator('#modals').getByText('24')).toBeVisible();
+    await expect(page.locator('#modals').getByText('53')).toBeVisible();
 
     await page.keyboard.press('Escape');
-    await expect(page.getByText('Детали ингредиента').first()).not.toBeVisible();
+    await expect(page.locator('#modals').getByText('Детали ингредиента')).not.toBeVisible();
 
-    await bunCard.click();
-    await expect(page.getByText('Детали ингредиента').first()).toBeVisible();
+    await page.locator('li').filter({ hasText: TEST_BUN_NAME }).locator('img').first().click();
+    await expect(page.locator('#modals').getByText('Детали ингредиента')).toBeVisible();
 
     await page.mouse.click(10, 10);
-    await expect(page.getByText('Детали ингредиента').first()).not.toBeVisible();
+    await expect(page.locator('#modals').getByText('Детали ингредиента')).not.toBeVisible();
   });
 
   test('Процесс создания заказа с моками авторизации', async ({ context, page }) => {
@@ -73,9 +77,10 @@ test.describe('Интеграционные тесты конструктора 
 
     await page.getByRole('button', { name: 'Оформить заказ' }).click();
 
-    await expect(page.getByText('идентификатор заказа').first()).toBeVisible({ timeout: 10000 });
-    
-    await expect(page.getByText('987654')).toBeVisible();
+    const orderModalText = page.locator('#modals').getByText('идентификатор заказа');
+    await expect(orderModalText).toBeVisible({ timeout: 10000 });
+
+    await expect(page.locator('#modals').getByText('987654')).toBeVisible();
 
     await expect(constructorZone).toContainText('Выберите булки');
     await expect(constructorZone).toContainText('Выберите начинку');
@@ -83,6 +88,6 @@ test.describe('Интеграционные тесты конструктора 
     await expect(constructorZone).not.toContainText(TEST_FILLING_NAME);
 
     await page.mouse.click(10, 10);
-    await expect(page.getByText('идентификатор заказа').first()).not.toBeVisible();
+    await expect(orderModalText).not.toBeVisible();
   });
 });
