@@ -1,75 +1,49 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Интеграционные тесты конструктора бургера', () => {
-    
-  test('Добавление ингредиента и работа модального окна', async ({ page }) => {
-    await page.routeFromHAR('tests/hars/ingredients.har', {
-      url: '**/api/ingredients**',
-      update: false,
-    });
+const TEST_BUN_NAME = 'Краторная булка N-200i';
+const TEST_FILLING_NAME = 'Биокотлета из марсианской Магнолии';
 
-    await page.goto('http://localhost:4000');
+test.describe('Интеграционные тесты конструктора бургера', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.routeFromHAR('tests/hars/ingredients.har', { url: '**/api/ingredients**', update: false });
+    await page.routeFromHAR('tests/hars/auth-user.har', { url: '**/api/auth/user**', update: false });
+    await page.routeFromHAR('tests/hars/auth-token.har', { url: '**/api/auth/token**', update: false });
+    await page.routeFromHAR('tests/hars/order.har', { url: '**/api/orders**', update: false });
+  });
+
+  test('Добавление ингредиента в конструктор', async ({ page }) => {
+    await page.goto('/');
     await expect(page.getByText('Соберите бургер')).toBeVisible();
 
-    await page.locator('img').first().click();
+    const bunButton = page.locator('li').filter({ hasText: TEST_BUN_NAME }).getByRole('button', { name: 'Добавить' }).first();
+    await bunButton.click();
 
-    await expect(page.getByText('Детали ингредиента')).toBeVisible();
+    const constructorZone = page.getByTestId('constructor');
+    await expect(constructorZone).not.toContainText('Выберите булки');
+    await expect(constructorZone).toContainText(TEST_BUN_NAME);
+  });
+
+  test('Открытие и закрытие модального окна ингредиента', async ({ page }) => {
+    await page.goto('/');
+    
+    const bunCard = page.locator('li').filter({ hasText: TEST_BUN_NAME }).first();
+    await bunCard.click();
+
+    await expect(page.getByText('Детали ингредиента').first()).toBeVisible();
+    await expect(page.getByText(TEST_BUN_NAME).first()).toBeVisible();
 
     await page.keyboard.press('Escape');
-    await expect(page.getByText('Детали ингредиента')).not.toBeVisible();
+    await expect(page.getByText('Детали ингредиента').first()).not.toBeVisible();
 
-    await page.getByRole('button', { name: 'Добавить' }).first().click();
+    await bunCard.click();
+    await expect(page.getByText('Детали ингредиента').first()).toBeVisible();
 
-    await expect(page.getByText('Выберите начинку')).toBeVisible();
-
-    await page.locator('img').first().click();
-    await expect(page.getByText('Детали ингредиента')).toBeVisible();
-    
     await page.mouse.click(10, 10);
-    await expect(page.getByText('Детали ингредиента')).not.toBeVisible();
+    await expect(page.getByText('Детали ингредиента').first()).not.toBeVisible();
   });
 
   test('Процесс создания заказа с моками авторизации', async ({ context, page }) => {
-    await page.route('**/api/auth/user**', async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ 
-          success: true, 
-          user: { email: 'test@test.com', name: 'Test User' } 
-        })
-      });
-    });
-
-    await page.route('**/api/auth/token**', async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ 
-          success: true, 
-          accessToken: 'fake-new-token', 
-          refreshToken: 'fake-new-refresh' 
-        })
-      });
-    });
-
-    await page.route('**/api/orders**', async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          name: "Тестовый бургер",
-          order: { number: 123456 }
-        })
-      });
-    });
-
-    await page.routeFromHAR('tests/hars/ingredients.har', {
-      url: '**/api/ingredients**',
-      update: false
-    });
-
     await context.addCookies([
       {
         name: 'accessToken',
@@ -84,25 +58,31 @@ test.describe('Интеграционные тесты конструктора 
       localStorage.setItem('refreshToken', 'fake-refresh-token-for-testing');
     });
 
-    await page.goto('http://localhost:4000');
+    await page.goto('/');
     await expect(page.getByText('Соберите бургер')).toBeVisible();
 
-    await page.getByRole('button', { name: 'Добавить' }).first().click();
+    const bunButton = page.locator('li').filter({ hasText: TEST_BUN_NAME }).getByRole('button', { name: 'Добавить' }).first();
+    await bunButton.click();
 
-    const addButtons = page.getByRole('button', { name: 'Добавить' });
-    await addButtons.nth(2).click();
+    const fillingButton = page.locator('li').filter({ hasText: TEST_FILLING_NAME }).getByRole('button', { name: 'Добавить' }).first();
+    await fillingButton.click();
 
-    await page.waitForTimeout(500);
+    const constructorZone = page.getByTestId('constructor');
+    await expect(constructorZone).toContainText(TEST_BUN_NAME);
+    await expect(constructorZone).toContainText(TEST_FILLING_NAME);
 
     await page.getByRole('button', { name: 'Оформить заказ' }).click();
 
-    await expect(page.getByText(/Ваш заказ начали готовить|идентификатор заказа/i).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('идентификатор заказа').first()).toBeVisible({ timeout: 10000 });
+    
+    await expect(page.getByText('987654')).toBeVisible();
 
-    await expect(page.getByText('123456').first()).toBeVisible();
-
-    await expect(page.getByText('Выберите булки').first()).toBeVisible();
+    await expect(constructorZone).toContainText('Выберите булки');
+    await expect(constructorZone).toContainText('Выберите начинку');
+    await expect(constructorZone).not.toContainText(TEST_BUN_NAME);
+    await expect(constructorZone).not.toContainText(TEST_FILLING_NAME);
 
     await page.mouse.click(10, 10);
-    await expect(page.getByText(/Ваш заказ начали готовить|идентификатор заказа/i).first()).not.toBeVisible();
+    await expect(page.getByText('идентификатор заказа').first()).not.toBeVisible();
   });
 });
